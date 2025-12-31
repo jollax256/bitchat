@@ -38,17 +38,34 @@ struct PaymentChipView: View {
                 String(localized: "content.payment.lightning", comment: "Label for Lightning payment chip")
             }
         }
+        
+        var accentColor: Color {
+            switch self {
+            case .cashu:
+                Color.orange
+            case .lightning:
+                Color.yellow
+            }
+        }
     }
     
     let paymentType: PaymentType
     
-    private var fgColor: Color {
-        colorScheme == .dark ? Color.green : Color(red: 0, green: 0.5, blue: 0)
+    private var backgroundColor: Color {
+        colorScheme == .dark 
+            ? paymentType.accentColor.opacity(0.15)
+            : paymentType.accentColor.opacity(0.12)
     }
-    private var bgColor: Color {
-        colorScheme == .dark ? Color.gray.opacity(0.18) : Color.gray.opacity(0.12)
+    
+    private var borderColor: Color {
+        paymentType.accentColor.opacity(0.3)
     }
-    private var border: Color { fgColor.opacity(0.25) }
+    
+    private var textColor: Color {
+        colorScheme == .dark 
+            ? paymentType.accentColor
+            : paymentType.accentColor.opacity(0.9)
+    }
     
     var body: some View {
         Button {
@@ -60,22 +77,24 @@ struct PaymentChipView: View {
         } label: {
             HStack(spacing: 6) {
                 Text(paymentType.emoji)
+                    .font(.system(size: 14))
                 Text(paymentType.label)
-                    .font(.bitchatSystem(size: 12, weight: .semibold, design: .monospaced))
+                    .font(.bitchatSystem(size: 12, weight: .semibold))
             }
-            .padding(.vertical, 6)
-            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .padding(.horizontal, 14)
             .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(bgColor)
+                Capsule()
+                    .fill(backgroundColor)
             )
             .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(border, lineWidth: 1)
+                Capsule()
+                    .stroke(borderColor, lineWidth: 1)
             )
-            .foregroundColor(fgColor)
+            .foregroundColor(textColor)
         }
         .buttonStyle(.plain)
+        .subtleShadow(colorScheme: colorScheme)
     }
 }
 
@@ -83,25 +102,29 @@ struct PaymentChipView: View {
     let cashuLink = "https://example.com/cashu"
     let lightningLink = "https://example.com/lightning"
     
-    List {
+    VStack(spacing: 20) {
+        Text("Light Mode")
+            .font(.headline)
         HStack {
             PaymentChipView(paymentType: .cashu(cashuLink))
             PaymentChipView(paymentType: .lightning(lightningLink))
         }
-        .listRowSeparator(.hidden)
-        .listRowInsets(EdgeInsets())
-        .listRowBackground(EmptyView())
-    }
-    .environment(\.colorScheme, .light)
-
-    List {
+        .padding()
+        .background(Color.white)
+        .cornerRadius(12)
+        .environment(\.colorScheme, .light)
+        
+        Text("Dark Mode")
+            .font(.headline)
         HStack {
             PaymentChipView(paymentType: .cashu(cashuLink))
             PaymentChipView(paymentType: .lightning(lightningLink))
         }
-        .listRowSeparator(.hidden)
-        .listRowInsets(EdgeInsets())
-        .listRowBackground(EmptyView())
+        .padding()
+        .background(Color.black)
+        .cornerRadius(12)
+        .environment(\.colorScheme, .dark)
     }
-    .environment(\.colorScheme, .dark)
+    .padding()
+    .background(Color.gray.opacity(0.3))
 }

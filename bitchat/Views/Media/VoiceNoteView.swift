@@ -27,11 +27,11 @@ struct VoiceNoteView: View {
     }
 
     private var backgroundColor: Color {
-        colorScheme == .dark ? Color.black.opacity(0.6) : Color.white
+        BitchatTheme.secondaryBackground(colorScheme)
     }
 
     private var borderColor: Color {
-        colorScheme == .dark ? Color.green.opacity(0.3) : Color.green.opacity(0.2)
+        BitchatTheme.divider(colorScheme)
     }
 
     private var durationText: String {
@@ -56,13 +56,19 @@ struct VoiceNoteView: View {
 
     var body: some View {
         HStack(spacing: 12) {
+            // Modern play button
             Button(action: playback.togglePlayback) {
                 Image(systemName: playback.isPlaying ? "pause.fill" : "play.fill")
+                    .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(.white)
-                    .frame(width: 36, height: 36)
-                    .background(Circle().fill(Color.green))
+                    .frame(width: 40, height: 40)
+                    .background(
+                        Circle()
+                            .fill(BitchatTheme.accentGradient)
+                    )
             }
             .buttonStyle(.plain)
+            .subtleShadow(colorScheme: colorScheme)
 
             WaveformView(
                 samples: samples,
@@ -75,30 +81,30 @@ struct VoiceNoteView: View {
             )
 
             Text(playbackLabel)
-                .font(.bitchatSystem(size: 13, design: .monospaced))
-                .foregroundColor(Color.secondary)
+                .font(.bitchatMono(size: 12))
+                .foregroundColor(BitchatTheme.secondaryText(colorScheme))
 
             if let onCancel = onCancel, isSending {
                 Button(action: onCancel) {
                     Image(systemName: "xmark")
-                        .font(.bitchatSystem(size: 12, weight: .bold))
+                        .font(.system(size: 12, weight: .bold))
                         .frame(width: 28, height: 28)
-                        .background(Circle().fill(Color.red.opacity(0.9)))
+                        .background(Circle().fill(BitchatTheme.error))
                         .foregroundColor(.white)
                 }
                 .buttonStyle(.plain)
             }
         }
-        .padding(12)
+        .padding(14)
         .background(
-            RoundedRectangle(cornerRadius: 14)
+            RoundedRectangle(cornerRadius: BitchatTheme.cardCornerRadius, style: .continuous)
                 .fill(backgroundColor)
-                .shadow(color: Color.black.opacity(colorScheme == .dark ? 0.3 : 0.1), radius: 6, x: 0, y: 2)
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 14)
-                .stroke(borderColor, lineWidth: 1)
+            RoundedRectangle(cornerRadius: BitchatTheme.cardCornerRadius, style: .continuous)
+                .stroke(borderColor, lineWidth: 0.5)
         )
+        .subtleShadow(colorScheme: colorScheme)
         .task {
             // Defer loading to let UI settle after view appears
             try? await Task.sleep(nanoseconds: 100_000_000) // 0.1s

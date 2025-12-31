@@ -11,15 +11,23 @@ import SwiftUI
 struct DeliveryStatusView: View {
     @Environment(\.colorScheme) private var colorScheme
     let status: DeliveryStatus
+    var isOutgoing: Bool = false
 
     // MARK: - Computed Properties
     
-    private var textColor: Color {
-        colorScheme == .dark ? Color.green : Color(red: 0, green: 0.5, blue: 0)
-    }
-    
-    private var secondaryTextColor: Color {
-        colorScheme == .dark ? Color.green.opacity(0.8) : Color(red: 0, green: 0.5, blue: 0).opacity(0.8)
+    private var iconColor: Color {
+        switch status {
+        case .sending, .sent:
+            return isOutgoing ? .white.opacity(0.6) : BitchatTheme.secondaryText(colorScheme)
+        case .delivered:
+            return isOutgoing ? .white.opacity(0.8) : BitchatTheme.deliveredIndicator(colorScheme)
+        case .read:
+            return BitchatTheme.readReceipt
+        case .failed:
+            return BitchatTheme.error
+        case .partiallyDelivered:
+            return isOutgoing ? .white.opacity(0.6) : BitchatTheme.secondaryText(colorScheme)
+        }
     }
 
     private enum Strings {
@@ -63,48 +71,48 @@ struct DeliveryStatusView: View {
         switch status {
         case .sending:
             Image(systemName: "circle")
-                .font(.bitchatSystem(size: 10))
-                .foregroundColor(secondaryTextColor.opacity(0.6))
+                .font(.system(size: 10, weight: .medium))
+                .foregroundColor(iconColor)
             
         case .sent:
             Image(systemName: "checkmark")
-                .font(.bitchatSystem(size: 10))
-                .foregroundColor(secondaryTextColor.opacity(0.6))
+                .font(.system(size: 10, weight: .medium))
+                .foregroundColor(iconColor)
             
         case .delivered(let nickname, _):
-            HStack(spacing: -2) {
+            HStack(spacing: -3) {
                 Image(systemName: "checkmark")
-                    .font(.bitchatSystem(size: 10))
+                    .font(.system(size: 10, weight: .semibold))
                 Image(systemName: "checkmark")
-                    .font(.bitchatSystem(size: 10))
+                    .font(.system(size: 10, weight: .semibold))
             }
-            .foregroundColor(textColor.opacity(0.8))
+            .foregroundColor(iconColor)
             .help(Strings.delivered(to: nickname))
             
         case .read(let nickname, _):
-            HStack(spacing: -2) {
+            HStack(spacing: -3) {
                 Image(systemName: "checkmark")
-                    .font(.bitchatSystem(size: 10, weight: .bold))
+                    .font(.system(size: 10, weight: .bold))
                 Image(systemName: "checkmark")
-                    .font(.bitchatSystem(size: 10, weight: .bold))
+                    .font(.system(size: 10, weight: .bold))
             }
-            .foregroundColor(Color(red: 0.0, green: 0.478, blue: 1.0))  // Bright blue
+            .foregroundColor(iconColor)
             .help(Strings.read(by: nickname))
             
         case .failed(let reason):
-            Image(systemName: "exclamationmark.triangle")
-                .font(.bitchatSystem(size: 10))
-                .foregroundColor(Color.red.opacity(0.8))
+            Image(systemName: "exclamationmark.circle.fill")
+                .font(.system(size: 12, weight: .medium))
+                .foregroundColor(iconColor)
                 .help(Strings.failed(reason))
             
         case .partiallyDelivered(let reached, let total):
-            HStack(spacing: 1) {
+            HStack(spacing: 2) {
                 Image(systemName: "checkmark")
-                    .font(.bitchatSystem(size: 10))
+                    .font(.system(size: 10, weight: .medium))
                 Text(verbatim: "\(reached)/\(total)")
-                    .font(.bitchatSystem(size: 10, design: .monospaced))
+                    .font(.bitchatMono(size: 9))
             }
-            .foregroundColor(secondaryTextColor.opacity(0.6))
+            .foregroundColor(iconColor)
             .help(Strings.deliveredToMembers(reached, total))
         }
     }
@@ -120,25 +128,28 @@ struct DeliveryStatusView: View {
         .partiallyDelivered(reached: 2, total: 5)
     ]
     
-    List {
-        ForEach(statuses, id: \.self) { status in
-            HStack {
-                Text(status.displayText)
-                Spacer()
-                DeliveryStatusView(status: status)
+    VStack(spacing: 16) {
+        Text("Outgoing (white)")
+            .font(.headline)
+        HStack(spacing: 16) {
+            ForEach(statuses, id: \.self) { status in
+                DeliveryStatusView(status: status, isOutgoing: true)
             }
         }
-    }
-    .environment(\.colorScheme, .light)
-
-    List {
-        ForEach(statuses, id: \.self) { status in
-            HStack {
-                Text(status.displayText)
-                Spacer()
-                DeliveryStatusView(status: status)
+        .padding()
+        .background(BitchatTheme.outgoingBubble)
+        .cornerRadius(12)
+        
+        Text("Incoming (themed)")
+            .font(.headline)
+        HStack(spacing: 16) {
+            ForEach(statuses, id: \.self) { status in
+                DeliveryStatusView(status: status, isOutgoing: false)
             }
         }
+        .padding()
+        .background(Color.gray.opacity(0.2))
+        .cornerRadius(12)
     }
-    .environment(\.colorScheme, .dark)
+    .padding()
 }

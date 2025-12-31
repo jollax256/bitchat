@@ -17,6 +17,7 @@ struct BlockRevealImageView: View {
     private let onOpen: (() -> Void)?
     private let onDelete: (() -> Void)?
 
+    @Environment(\.colorScheme) private var colorScheme
     @State private var platformImage: PlatformImage?
     @State private var aspectRatio: CGFloat = 1
     @State private var isBlurred: Bool = false
@@ -50,10 +51,10 @@ struct BlockRevealImageView: View {
                 Image(platformImage: image)
                     .resizable()
                     .aspectRatio(aspectRatio, contentMode: .fit)
-                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .clipShape(RoundedRectangle(cornerRadius: BitchatTheme.bubbleCornerRadius, style: .continuous))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+                        RoundedRectangle(cornerRadius: BitchatTheme.bubbleCornerRadius, style: .continuous)
+                            .stroke(BitchatTheme.divider(colorScheme), lineWidth: 0.5)
                     )
                     .mask(
                         BlockRevealMask(
@@ -66,29 +67,35 @@ struct BlockRevealImageView: View {
                     .blur(radius: isBlurred ? 20 : 0)
                     .overlay {
                         if isBlurred {
-                            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                .fill(Color.black.opacity(0.35))
+                            RoundedRectangle(cornerRadius: BitchatTheme.bubbleCornerRadius, style: .continuous)
+                                .fill(Color.black.opacity(0.45))
                                 .overlay(
-                                    Image(systemName: "eye.slash.fill")
-                                        .font(.bitchatSystem(size: 24, weight: .semibold))
-                                        .foregroundColor(.white.opacity(0.85))
+                                    VStack(spacing: 8) {
+                                        Image(systemName: "eye.slash.fill")
+                                            .font(.system(size: 28, weight: .semibold))
+                                            .foregroundColor(.white.opacity(0.9))
+                                        Text("Tap to reveal")
+                                            .font(.bitchatSystem(size: 12, weight: .medium))
+                                            .foregroundColor(.white.opacity(0.7))
+                                    }
                                 )
                         }
                     }
             } else {
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(Color.gray.opacity(0.2))
+                RoundedRectangle(cornerRadius: BitchatTheme.bubbleCornerRadius, style: .continuous)
+                    .fill(BitchatTheme.secondaryBackground(colorScheme))
                     .frame(height: 200)
                     .overlay(
                         ProgressView()
                             .progressViewStyle(.circular)
+                            .tint(BitchatTheme.accent)
                     )
             }
 
             if let onCancel = onCancel, isSending {
                 Button(action: onCancel) {
                     Image(systemName: "xmark")
-                        .font(.bitchatSystem(size: 12, weight: .bold))
+                        .font(.system(size: 12, weight: .bold))
                         .padding(8)
                         .background(Circle().fill(Color.black.opacity(0.7)))
                         .foregroundColor(.white)
@@ -97,6 +104,7 @@ struct BlockRevealImageView: View {
                 .buttonStyle(.plain)
             }
         }
+        .subtleShadow(colorScheme: colorScheme)
         .onAppear {
             isBlurred = initiallyBlurred
             loadImage()

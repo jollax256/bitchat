@@ -83,15 +83,15 @@ struct ContentView: View {
     // MARK: - Computed Properties
     
     private var backgroundColor: Color {
-        colorScheme == .dark ? Color.black : Color.white
+        BitchatTheme.primaryBackground(colorScheme)
     }
 
     private var textColor: Color {
-        colorScheme == .dark ? Color.green : Color(red: 0, green: 0.5, blue: 0)
+        BitchatTheme.primaryText(colorScheme)
     }
 
     private var secondaryTextColor: Color {
-        colorScheme == .dark ? Color.green.opacity(0.8) : Color(red: 0, green: 0.5, blue: 0).opacity(0.8)
+        BitchatTheme.secondaryText(colorScheme)
     }
 
     private var headerLineLimit: Int? {
@@ -620,17 +620,17 @@ struct ContentView: View {
                 recordingIndicator
             }
 
-            HStack(alignment: .center, spacing: 4) {
+            HStack(alignment: .center, spacing: 8) {
                 TextField(
                     "",
                     text: $messageText,
                     prompt: Text(
                         String(localized: "content.input.message_placeholder", comment: "Placeholder shown in the chat composer")
                     )
-                    .foregroundColor(secondaryTextColor.opacity(0.6))
+                    .foregroundColor(BitchatTheme.tertiaryText(colorScheme))
                 )
                 .textFieldStyle(.plain)
-                .font(.bitchatSystem(size: 15, design: .monospaced))
+                .font(.bitchatSystem(size: 16))
                 .foregroundColor(textColor)
                 .focused($isTextFieldFocused)
                 .autocorrectionDisabled(true)
@@ -639,12 +639,17 @@ struct ContentView: View {
 #endif
                 .submitLabel(.send)
                 .onSubmit { sendMessage() }
-                .padding(.vertical, 4)
-                .padding(.horizontal, 6)
+                .padding(.vertical, 10)
+                .padding(.horizontal, 16)
                 .background(
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .fill(colorScheme == .dark ? Color.black.opacity(0.35) : Color.white.opacity(0.7))
+                    Capsule()
+                        .fill(BitchatTheme.secondaryBackground(colorScheme))
                 )
+                .overlay(
+                    Capsule()
+                        .stroke(BitchatTheme.divider(colorScheme), lineWidth: 0.5)
+                )
+                .inputShadow(colorScheme: colorScheme)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .onChange(of: messageText) { newValue in
                     autocompleteDebounceTimer?.invalidate()
@@ -656,7 +661,7 @@ struct ContentView: View {
                     }
                 }
 
-                HStack(alignment: .center, spacing: 4) {
+                HStack(alignment: .center, spacing: 6) {
                     if shouldShowMediaControls {
                         attachmentButton
                     }
@@ -665,10 +670,13 @@ struct ContentView: View {
                 }
             }
         }
-        .padding(.horizontal, 6)
-        .padding(.top, 6)
-        .padding(.bottom, 8)
-        .background(backgroundColor.opacity(0.95))
+        .padding(.horizontal, 12)
+        .padding(.top, 8)
+        .padding(.bottom, 10)
+        .background(
+            BitchatTheme.primaryBackground(colorScheme)
+                .shadow(color: colorScheme == .dark ? .black.opacity(0.3) : .black.opacity(0.05), radius: 8, x: 0, y: -2)
+        )
     }
     
     private func handleOpenURL(_ url: URL) {
@@ -1216,7 +1224,7 @@ struct ContentView: View {
     
     private var mainHeaderView: some View {
         HStack(spacing: 0) {
-            Text(verbatim: "bitchat/")
+            Text(verbatim: "NupChat/")
                 .font(.bitchatSystem(size: 18, weight: .medium, design: .monospaced))
                 .foregroundColor(textColor)
                 .onTapGesture(count: 3) {
@@ -1633,52 +1641,16 @@ private extension ContentView {
 
     @ViewBuilder
     private func textMessageRow(_ message: BitchatMessage) -> some View {
-        let cashuTokens = message.content.extractCashuLinks()
-        let lightningLinks = message.content.extractLightningLinks()
-        let isLong = (message.content.count > TransportConfig.uiLongMessageLengthThreshold || message.content.hasVeryLongToken(threshold: TransportConfig.uiVeryLongTokenThreshold)) && cashuTokens.isEmpty
-        let isExpanded = expandedMessageIDs.contains(message.id)
-
-        VStack(alignment: .leading, spacing: 0) {
-            HStack(alignment: .top, spacing: 0) {
-                Text(viewModel.formatMessageAsText(message, colorScheme: colorScheme))
-                    .fixedSize(horizontal: false, vertical: true)
-                    .lineLimit(isLong && !isExpanded ? TransportConfig.uiLongMessageLineLimit : nil)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-
-                if message.isPrivate && message.sender == viewModel.nickname,
-                   let status = message.deliveryStatus {
-                    DeliveryStatusView(status: status)
-                        .padding(.leading, 4)
-                }
-            }
-
-            if isLong && cashuTokens.isEmpty {
-                let labelKey = isExpanded ? LocalizedStringKey("content.message.show_less") : LocalizedStringKey("content.message.show_more")
-                Button(labelKey) {
-                    if isExpanded { expandedMessageIDs.remove(message.id) }
-                    else { expandedMessageIDs.insert(message.id) }
-                }
-                .font(.bitchatSystem(size: 11, weight: .medium, design: .monospaced))
-                .foregroundColor(Color.blue)
-                .padding(.top, 4)
-            }
-
-            if !lightningLinks.isEmpty || !cashuTokens.isEmpty {
-                HStack(spacing: 8) {
-                    ForEach(Array(lightningLinks.prefix(3)), id: \.self) { link in
-                        PaymentChipView(paymentType: .lightning(link))
-                    }
-
-                    ForEach(Array(cashuTokens.prefix(3)), id: \.self) { token in
-                        let enc = token.addingPercentEncoding(withAllowedCharacters: .alphanumerics.union(CharacterSet(charactersIn: "-_"))) ?? token
-                        let urlStr = "cashu:\(enc)"
-                        PaymentChipView(paymentType: .cashu(urlStr))
-                    }
-                }
-                .padding(.top, 6)
-                .padding(.leading, 2)
-            }
-        }
+        // Determine if this is an outgoing message (sent by us)
+        let isOutgoing = message.sender == viewModel.nickname || 
+                         message.sender.hasPrefix(viewModel.nickname + "#") ||
+                         message.senderPeerID == viewModel.meshService.myPeerID
+        
+        TextMessageView(
+            message: message, 
+            isOutgoing: isOutgoing, 
+            expandedMessageIDs: $expandedMessageIDs
+        )
     }
 
     private func expandWindow(ifNeededFor message: BitchatMessage,

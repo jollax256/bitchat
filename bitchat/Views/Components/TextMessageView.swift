@@ -13,55 +13,100 @@ struct TextMessageView: View {
     @EnvironmentObject private var viewModel: ChatViewModel
     
     let message: BitchatMessage
+    let isOutgoing: Bool
     @Binding var expandedMessageIDs: Set<String>
     
+    init(message: BitchatMessage, isOutgoing: Bool = false, expandedMessageIDs: Binding<Set<String>>) {
+        self.message = message
+        self.isOutgoing = isOutgoing
+        self._expandedMessageIDs = expandedMessageIDs
+    }
+    
+    private var bubbleBackground: some View {
+        Group {
+            if isOutgoing {
+                RoundedRectangle(cornerRadius: BitchatTheme.bubbleCornerRadius, style: .continuous)
+                    .fill(BitchatTheme.outgoingBubbleGradient)
+            } else {
+                RoundedRectangle(cornerRadius: BitchatTheme.bubbleCornerRadius, style: .continuous)
+                    .fill(BitchatTheme.incomingBubble(colorScheme))
+            }
+        }
+    }
+    
+    private var textColor: Color {
+        isOutgoing ? .white : BitchatTheme.primaryText(colorScheme)
+    }
+    
+    private var secondaryTextColor: Color {
+        isOutgoing ? .white.opacity(0.7) : BitchatTheme.secondaryText(colorScheme)
+    }
+    
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            // Precompute heavy token scans once per row
-            let cashuLinks = message.content.extractCashuLinks()
-            let lightningLinks = message.content.extractLightningLinks()
-            HStack(alignment: .top, spacing: 0) {
-                let isLong = (message.content.count > TransportConfig.uiLongMessageLengthThreshold || message.content.hasVeryLongToken(threshold: TransportConfig.uiVeryLongTokenThreshold)) && cashuLinks.isEmpty
-                let isExpanded = expandedMessageIDs.contains(message.id)
-                Text(viewModel.formatMessageAsText(message, colorScheme: colorScheme))
-                    .fixedSize(horizontal: false, vertical: true)
-                    .lineLimit(isLong && !isExpanded ? TransportConfig.uiLongMessageLineLimit : nil)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                
-                // Delivery status indicator for private messages
-                if message.isPrivate && message.sender == viewModel.nickname,
-                   let status = message.deliveryStatus {
-                    DeliveryStatusView(status: status)
-                        .padding(.leading, 4)
-                }
-            }
+        let cashuLinks = message.content.extractCashuLinks()
+        let lightningLinks = message.content.extractLightningLinks()
+        let isLong = (message.content.count > TransportConfig.uiLongMessageLengthThreshold || message.content.hasVeryLongToken(threshold: TransportConfig.uiVeryLongTokenThreshold)) && cashuLinks.isEmpty
+        let isExpanded = expandedMessageIDs.contains(message.id)
+        
+        HStack {
+            if isOutgoing { Spacer(minLength: 60) }
             
-            // Expand/Collapse for very long messages
-            if (message.content.count > TransportConfig.uiLongMessageLengthThreshold || message.content.hasVeryLongToken(threshold: TransportConfig.uiVeryLongTokenThreshold)) && cashuLinks.isEmpty {
-                let isExpanded = expandedMessageIDs.contains(message.id)
-                let labelKey = isExpanded ? LocalizedStringKey("content.message.show_less") : LocalizedStringKey("content.message.show_more")
-                Button(labelKey) {
-                    if isExpanded { expandedMessageIDs.remove(message.id) }
-                    else { expandedMessageIDs.insert(message.id) }
-                }
-                .font(.bitchatSystem(size: 11, weight: .medium, design: .monospaced))
-                .foregroundColor(Color.blue)
-                .padding(.top, 4)
-            }
-
-            // Render payment chips (Lightning / Cashu) with rounded background
-            if !lightningLinks.isEmpty || !cashuLinks.isEmpty {
-                HStack(spacing: 8) {
-                    ForEach(lightningLinks, id: \.self) { link in
-                        PaymentChipView(paymentType: .lightning(link))
+            VStack(alignment: isOutgoing ? .trailing : .leading, spacing: 4) {
+                // Message bubble
+                VStack(alignment: .leading, spacing: 4) {
+                    // Message content
+                    Text(viewModel.formatMessageAsText(message, colorScheme: colorScheme))
+                        .font(.bitchatSystem(size: 15))
+                        .foregroundColor(textColor)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .lineLimit(isLong && !isExpanded ? TransportConfig.uiLongMessageLineLimit : nil)
+                    
+                    // Expand/Collapse for very long messages
+                    if isLong {
+                        Button(action: {
+                            if isExpanded { expandedMessageIDs.remove(message.id) }
+                            else { expandedMessageIDs.insert(message.id) }
+                        }) {
+                            Text(isExpanded ? "Show less" : "Show more")
+                                .font(.bitchatSystem(size: 12, weight: .medium))
+                                .foregroundColor(isOutgoing ? .white.opacity(0.8) : BitchatTheme.accent)
+                        }
+                        .buttonStyle(.plain)
                     }
-                    ForEach(cashuLinks, id: \.self) { link in
-                        PaymentChipView(paymentType: .cashu(link))
+                    
+                    // Bottom row: timestamp + delivery status
+                    HStack(spacing: 4) {
+                        Text(message.timestamp, style: .time)
+                            .font(.bitchatMono(size: 10))
+                            .foregroundColor(secondaryTextColor)
+                        
+                        // Delivery status indicator for private messages
+                        if message.isPrivate && message.sender == viewModel.nickname,
+                           let status = message.deliveryStatus {
+                            DeliveryStatusView(status: status, isOutgoing: isOutgoing)
+                        }
                     }
                 }
-                .padding(.top, 6)
-                .padding(.leading, 2)
+                .padding(.horizontal, BitchatTheme.bubbleHorizontalPadding)
+                .padding(.vertical, BitchatTheme.bubbleVerticalPadding)
+                .background(bubbleBackground)
+                .subtleShadow(colorScheme: colorScheme)
+                
+                // Payment chips (outside bubble for better visibility)
+                if !lightningLinks.isEmpty || !cashuLinks.isEmpty {
+                    HStack(spacing: 8) {
+                        ForEach(lightningLinks, id: \.self) { link in
+                            PaymentChipView(paymentType: .lightning(link))
+                        }
+                        ForEach(cashuLinks, id: \.self) { link in
+                            PaymentChipView(paymentType: .cashu(link))
+                        }
+                    }
+                }
             }
+            .frame(maxWidth: UIScreen.main.bounds.width * BitchatTheme.bubbleMaxWidthRatio, alignment: isOutgoing ? .trailing : .leading)
+            
+            if !isOutgoing { Spacer(minLength: 60) }
         }
     }
 }
@@ -71,23 +116,15 @@ struct TextMessageView: View {
     @Previewable @State var ids: Set<String> = []
     let keychain = PreviewKeychainManager()
     
-    Group {
-        List {
-            TextMessageView(message: .preview, expandedMessageIDs: $ids)
-                .listRowSeparator(.hidden)
-                .listRowInsets(EdgeInsets())
-                .listRowBackground(EmptyView())
+    ScrollView {
+        VStack(spacing: 8) {
+            TextMessageView(message: .preview, isOutgoing: false, expandedMessageIDs: $ids)
+            TextMessageView(message: .preview, isOutgoing: true, expandedMessageIDs: $ids)
         }
-        .environment(\.colorScheme, .light)
-        
-        List {
-            TextMessageView(message: .preview, expandedMessageIDs: $ids)
-                .listRowSeparator(.hidden)
-                .listRowInsets(EdgeInsets())
-                .listRowBackground(EmptyView())
-        }
-        .environment(\.colorScheme, .dark)
+        .padding()
     }
+    .background(Color.black)
+    .environment(\.colorScheme, .dark)
     .environmentObject(
         ChatViewModel(
             keychain: keychain,

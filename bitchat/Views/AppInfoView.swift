@@ -5,15 +5,19 @@ struct AppInfoView: View {
     @Environment(\.colorScheme) var colorScheme
     
     private var backgroundColor: Color {
-        colorScheme == .dark ? Color.black : Color.white
+        BitchatTheme.primaryBackground(colorScheme)
     }
     
     private var textColor: Color {
-        colorScheme == .dark ? Color.green : Color(red: 0, green: 0.5, blue: 0)
+        BitchatTheme.primaryText(colorScheme)
     }
     
     private var secondaryTextColor: Color {
-        colorScheme == .dark ? Color.green.opacity(0.8) : Color(red: 0, green: 0.5, blue: 0).opacity(0.8)
+        BitchatTheme.secondaryText(colorScheme)
+    }
+    
+    private var accentColor: Color {
+        BitchatTheme.accent
     }
     
     // MARK: - Constants
@@ -102,7 +106,7 @@ struct AppInfoView: View {
                     dismiss()
                 }
                 .buttonStyle(.plain)
-                .foregroundColor(textColor)
+                .foregroundColor(accentColor)
                 .padding()
             }
             .background(backgroundColor.opacity(0.95))
@@ -123,9 +127,9 @@ struct AppInfoView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { dismiss() }) {
-                        Image(systemName: "xmark")
-                            .font(.bitchatSystem(size: 13, weight: .semibold, design: .monospaced))
-                            .foregroundColor(textColor)
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.system(size: 24))
+                            .foregroundColor(BitchatTheme.secondaryText(colorScheme))
                             .frame(width: 32, height: 32)
                     }
                     .buttonStyle(.plain)
@@ -139,77 +143,114 @@ struct AppInfoView: View {
     @ViewBuilder
     private var infoContent: some View {
         VStack(alignment: .leading, spacing: 24) {
-            // Header
-            VStack(alignment: .center, spacing: 8) {
+            // Header with gradient
+            VStack(alignment: .center, spacing: 12) {
+                // App icon or logo area
+                ZStack {
+                    Circle()
+                        .fill(BitchatTheme.accentGradient)
+                        .frame(width: 80, height: 80)
+                    Image(systemName: "bubble.left.and.bubble.right.fill")
+                        .font(.system(size: 36, weight: .medium))
+                        .foregroundColor(.white)
+                }
+                .cardShadow(colorScheme: colorScheme)
+                
                 Text(Strings.appName)
-                    .font(.bitchatSystem(size: 32, weight: .bold, design: .monospaced))
+                    .font(.bitchatSystem(size: 28, weight: .bold))
                     .foregroundColor(textColor)
                 
                 Text(Strings.tagline)
-                    .font(.bitchatSystem(size: 16, design: .monospaced))
+                    .font(.bitchatSystem(size: 15))
                     .foregroundColor(secondaryTextColor)
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical)
+            .padding(.vertical, 20)
             
-            // How to Use
-            VStack(alignment: .leading, spacing: 16) {
+            // How to Use - Card style
+            VStack(alignment: .leading, spacing: 12) {
                 SectionHeader(Strings.HowToUse.title)
 
-                VStack(alignment: .leading, spacing: 8) {
-                    ForEach(Array(Strings.HowToUse.instructions.enumerated()), id: \.offset) { _, instruction in
-                        Text(instruction)
+                VStack(alignment: .leading, spacing: 10) {
+                    ForEach(Array(Strings.HowToUse.instructions.enumerated()), id: \.offset) { index, instruction in
+                        HStack(alignment: .top, spacing: 10) {
+                            Text("\(index + 1)")
+                                .font(.bitchatSystem(size: 12, weight: .bold))
+                                .foregroundColor(.white)
+                                .frame(width: 22, height: 22)
+                                .background(Circle().fill(accentColor))
+                            Text(instruction)
+                                .font(.bitchatSystem(size: 14))
+                                .foregroundColor(textColor)
+                        }
                     }
                 }
-                .font(.bitchatSystem(size: 14, design: .monospaced))
-                .foregroundColor(textColor)
+                .padding(16)
+                .background(
+                    RoundedRectangle(cornerRadius: BitchatTheme.cardCornerRadius, style: .continuous)
+                        .fill(BitchatTheme.secondaryBackground(colorScheme))
+                )
             }
 
-            // Features
-            VStack(alignment: .leading, spacing: 16) {
+            // Features - Card style
+            VStack(alignment: .leading, spacing: 12) {
                 SectionHeader(Strings.Features.title)
 
-                FeatureRow(info: Strings.Features.offlineComm)
-
-                FeatureRow(info: Strings.Features.encryption)
-
-                FeatureRow(info: Strings.Features.extendedRange)
-
-                FeatureRow(info: Strings.Features.favorites)
-
-                FeatureRow(info: Strings.Features.geohash)
-
-                FeatureRow(info: Strings.Features.mentions)
+                VStack(spacing: 16) {
+                    FeatureRow(info: Strings.Features.offlineComm)
+                    FeatureRow(info: Strings.Features.encryption)
+                    FeatureRow(info: Strings.Features.extendedRange)
+                    FeatureRow(info: Strings.Features.favorites)
+                    FeatureRow(info: Strings.Features.geohash)
+                    FeatureRow(info: Strings.Features.mentions)
+                }
+                .padding(16)
+                .background(
+                    RoundedRectangle(cornerRadius: BitchatTheme.cardCornerRadius, style: .continuous)
+                        .fill(BitchatTheme.secondaryBackground(colorScheme))
+                )
             }
 
-            // Privacy
-            VStack(alignment: .leading, spacing: 16) {
+            // Privacy - Card style
+            VStack(alignment: .leading, spacing: 12) {
                 SectionHeader(Strings.Privacy.title)
 
-                FeatureRow(info: Strings.Privacy.noTracking)
-
-                FeatureRow(info: Strings.Privacy.ephemeral)
-
-                FeatureRow(info: Strings.Privacy.panic)
+                VStack(spacing: 16) {
+                    FeatureRow(info: Strings.Privacy.noTracking)
+                    FeatureRow(info: Strings.Privacy.ephemeral)
+                    FeatureRow(info: Strings.Privacy.panic)
+                }
+                .padding(16)
+                .background(
+                    RoundedRectangle(cornerRadius: BitchatTheme.cardCornerRadius, style: .continuous)
+                        .fill(BitchatTheme.secondaryBackground(colorScheme))
+                )
             }
 
-            // Warning
-            VStack(alignment: .leading, spacing: 6) {
-                SectionHeader(Strings.Warning.title)
-                    .foregroundColor(Color.red)
+            // Warning - Alert style card
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(spacing: 8) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundColor(BitchatTheme.error)
+                    Text(Strings.Warning.title)
+                        .font(.bitchatSystem(size: 14, weight: .bold))
+                        .foregroundColor(BitchatTheme.error)
+                }
                 
                 Text(Strings.Warning.message)
-                    .font(.bitchatSystem(size: 14, design: .monospaced))
-                    .foregroundColor(Color.red)
+                    .font(.bitchatSystem(size: 13))
+                    .foregroundColor(BitchatTheme.error.opacity(0.9))
                     .fixedSize(horizontal: false, vertical: true)
             }
-            .padding(.top, 6)
-            .padding(.bottom, 16)
-            .padding(.horizontal)
-            .background(Color.red.opacity(0.1))
-            .cornerRadius(8)
-            
-            .padding(.top)
+            .padding(16)
+            .background(
+                RoundedRectangle(cornerRadius: BitchatTheme.cardCornerRadius, style: .continuous)
+                    .fill(BitchatTheme.error.opacity(0.1))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: BitchatTheme.cardCornerRadius, style: .continuous)
+                    .stroke(BitchatTheme.error.opacity(0.3), lineWidth: 1)
+            )
         }
         .padding()
     }
@@ -225,19 +266,14 @@ struct SectionHeader: View {
     let title: LocalizedStringKey
     @Environment(\.colorScheme) var colorScheme
     
-    private var textColor: Color {
-        colorScheme == .dark ? Color.green : Color(red: 0, green: 0.5, blue: 0)
-    }
-    
     init(_ title: LocalizedStringKey) {
         self.title = title
     }
     
     var body: some View {
         Text(title)
-            .font(.bitchatSystem(size: 16, weight: .bold, design: .monospaced))
-            .foregroundColor(textColor)
-            .padding(.top, 8)
+            .font(.bitchatSystem(size: 18, weight: .bold))
+            .foregroundColor(BitchatTheme.primaryText(colorScheme))
     }
 }
 
@@ -245,29 +281,21 @@ struct FeatureRow: View {
     let info: AppInfoFeatureInfo
     @Environment(\.colorScheme) var colorScheme
     
-    private var textColor: Color {
-        colorScheme == .dark ? Color.green : Color(red: 0, green: 0.5, blue: 0)
-    }
-    
-    private var secondaryTextColor: Color {
-        colorScheme == .dark ? Color.green.opacity(0.8) : Color(red: 0, green: 0.5, blue: 0).opacity(0.8)
-    }
-    
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
+        HStack(alignment: .top, spacing: 14) {
             Image(systemName: info.icon)
-                .font(.bitchatSystem(size: 20))
-                .foregroundColor(textColor)
-                .frame(width: 30)
+                .font(.system(size: 20, weight: .medium))
+                .foregroundColor(BitchatTheme.accent)
+                .frame(width: 28, height: 28)
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(info.title)
-                    .font(.bitchatSystem(size: 14, weight: .semibold, design: .monospaced))
-                    .foregroundColor(textColor)
+                    .font(.bitchatSystem(size: 15, weight: .semibold))
+                    .foregroundColor(BitchatTheme.primaryText(colorScheme))
                 
                 Text(info.description)
-                    .font(.bitchatSystem(size: 12, design: .monospaced))
-                    .foregroundColor(secondaryTextColor)
+                    .font(.bitchatSystem(size: 13))
+                    .foregroundColor(BitchatTheme.secondaryText(colorScheme))
                     .fixedSize(horizontal: false, vertical: true)
             }
             
