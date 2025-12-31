@@ -39,27 +39,12 @@ class ChannelDrawer extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(3),
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white,
-                  ),
-                  child: CircleAvatar(
-                    radius: 28,
-                    backgroundColor: AppColors.primaryRed,
-                    backgroundImage: const AssetImage(
-                      'assets/icons/nupicon-iOS-Default-1024x1024@1x.png',
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
                 Image.asset(
                   'assets/images/nuplogo.png',
-                  height: 32,
+                  height: 38,
                   fit: BoxFit.contain,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
                 const Text(
                   "Secure P2P Mesh Network",
                   style: TextStyle(color: Colors.white70, fontSize: 13),

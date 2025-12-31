@@ -184,9 +184,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 child: Column(
                   children: [
                     Image.asset(
-                      'assets/icons/nupicon-iOS-Default-1024x1024@1x.png',
-                      width: 48,
-                      height: 48,
+                      'assets/images/nuplogo.png',
+                      height: 24,
+                      fit: BoxFit.contain,
                     ),
                     const SizedBox(height: 12),
                     Text(
