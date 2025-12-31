@@ -1,0 +1,60 @@
+name: nupchatflutter
+description: "NupChat - Decentralized P2P messaging with Bluetooth mesh and Nostr protocol"
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.4
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Icons
+  cupertino_icons: ^1.0.8
+  remixicon: ^1.4.1
+
+  # State Management
+  provider: ^6.1.2
+
+  # Bluetooth LE for mesh networking
+  flutter_blue_plus: ^1.35.0
+
+  # Nostr protocol
+  dart_nostr: ^5.0.1
+
+  # Note: Tor connectivity uses dart:io Socket directly
+
+  # Location & Geohash
+  geolocator: ^13.0.2
+  geohash_plus: ^1.1.0
+
+  # Cryptography
+  cryptography: ^2.7.0
+
+  # Storage
+  shared_preferences: ^2.3.4
+
+  # Utilities
+  uuid: ^4.0.0
+  intl: ^0.20.2
+  collection: ^1.18.0
+  flutter_native_splash: ^2.4.7
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+    - assets/icons/
+
+flutter_native_splash:
+  color: "#e41d30"
+  image: assets/images/nuplogo.png
+  color_dark: "#e41d30"
+  fullscreen: true

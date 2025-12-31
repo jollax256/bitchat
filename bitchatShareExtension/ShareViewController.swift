@@ -13,7 +13,7 @@ import UniformTypeIdentifiers
 /// Avoids deprecated Social framework and SLComposeServiceViewController.
 final class ShareViewController: UIViewController {
     // Bundle.main.bundleIdentifier would get the extension's bundleID
-    private static let groupID = "group.chat.bitchat"
+    private static let groupID = "group.chat.nupchat"
 
     private enum Strings {
         static let nothingToShare = String(localized: "share.status.nothing_to_share", comment: "Shown when the share extension receives no content")
@@ -171,8 +171,8 @@ final class ShareViewController: UIViewController {
 
     private func finishWithMessage(_ msg: String) {
         statusLabel.text = msg
-        // Complete shortly after showing status
-        DispatchQueue.main.asyncAfter(deadline: .now() + TransportConfig.uiShareExtensionDismissDelaySeconds) {
+        // Short delay to show status before dismissing (0.6 seconds)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
             self.extensionContext?.completeRequest(returningItems: [], completionHandler: nil)
         }
     }
