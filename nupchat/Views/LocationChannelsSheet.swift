@@ -113,6 +113,35 @@ struct LocationChannelsSheet: View {
                 }
 
                 channelList
+                
+                // DR Forms section
+                sectionDivider
+                    .padding(.vertical, 8)
+                NavigationLink(destination: DRFormView()) {
+                    HStack(spacing: 12) {
+                        Image(systemName: "doc.text.fill")
+                            .font(.bitchatSystem(size: 16))
+                            .foregroundColor(.red)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("DR Forms")
+                                .font(.bitchatSystem(size: 14, weight: .medium, design: .monospaced))
+                                .foregroundColor(colorScheme == .dark ? .white : .black)
+                            Text("Submit declaration of results forms")
+                                .font(.bitchatSystem(size: 11, design: .monospaced))
+                                .foregroundColor(.secondary)
+                        }
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.bitchatSystem(size: 12))
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(.vertical, 10)
+                    .padding(.horizontal, 12)
+                    .background(Color.red.opacity(0.08))
+                    .cornerRadius(10)
+                }
+                .buttonStyle(.plain)
+                
                 Spacer()
             }
             .padding(.horizontal, 16)
