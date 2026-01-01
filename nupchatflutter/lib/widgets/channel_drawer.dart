@@ -7,6 +7,8 @@ class ChannelDrawer extends StatelessWidget {
   final List<Channel> locationChannels;
   final Function(Channel) onChannelSelected;
   final VoidCallback? onSettingsPressed;
+  final bool hasLocationPermission;
+  final VoidCallback? onRequestLocationPermission;
 
   const ChannelDrawer({
     super.key,
@@ -14,6 +16,8 @@ class ChannelDrawer extends StatelessWidget {
     required this.locationChannels,
     required this.onChannelSelected,
     this.onSettingsPressed,
+    this.hasLocationPermission = false,
+    this.onRequestLocationPermission,
   });
 
   @override
@@ -73,9 +77,10 @@ class ChannelDrawer extends StatelessWidget {
                     },
                   ),
 
-                  if (locationChannels.isNotEmpty) ...[
-                    const SizedBox(height: 24),
-                    _SectionHeader(title: 'LOCATION CHANNELS'),
+                  const SizedBox(height: 24),
+                  _SectionHeader(title: 'LOCATION CHANNELS'),
+
+                  if (locationChannels.isNotEmpty)
                     ...locationChannels.map(
                       (channel) => _ChannelTile(
                         channel: channel,
@@ -86,8 +91,38 @@ class ChannelDrawer extends StatelessWidget {
                           Navigator.pop(context);
                         },
                       ),
+                    )
+                  else if (!hasLocationPermission)
+                    _LocationPermissionButton(
+                      onPressed: onRequestLocationPermission,
+                    )
+                  else
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      child: Row(
+                        children: [
+                          SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Theme.of(context).hintColor,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            'Loading nearby channels...',
+                            style: TextStyle(
+                              color: Theme.of(context).hintColor,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ],
                 ],
               ),
             ),
@@ -219,6 +254,69 @@ class _ChannelTile extends StatelessWidget {
               )
             : null,
         onTap: onTap,
+      ),
+    );
+  }
+}
+
+/// Button to request location permission
+class _LocationPermissionButton extends StatelessWidget {
+  final VoidCallback? onPressed;
+
+  const _LocationPermissionButton({this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+      child: Material(
+        color: AppColors.meshGreen.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.location_on_outlined,
+                  color: AppColors.meshGreen,
+                  size: 22,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Enable Location',
+                        style: TextStyle(
+                          color: AppColors.meshGreen,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Tap to enable location channels',
+                        style: TextStyle(
+                          color: Theme.of(context).hintColor,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 14,
+                  color: AppColors.meshGreen,
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

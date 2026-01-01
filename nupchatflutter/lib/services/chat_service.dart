@@ -33,6 +33,13 @@ class ChatService extends ChangeNotifier {
        _nostrService = nostrService ?? NostrService(),
        _locationService = locationService ?? LocationService() {
     _setupCallbacks();
+    // Listen to location changes and propagate to UI
+    _locationService.addListener(_onLocationChanged);
+  }
+
+  void _onLocationChanged() {
+    // Propagate location service updates to UI
+    notifyListeners();
   }
 
   // Getters
@@ -51,6 +58,16 @@ class ChatService extends ChangeNotifier {
   bool get isMeshScanning => _bleMeshService.isScanning;
   bool get isNostrConnected => _nostrService.isConnected;
   String get myPeerId => _bleMeshService.myPeerId;
+  bool get hasLocationPermission => _locationService.hasPermission;
+
+  /// Request location permission and refresh channels
+  Future<void> requestLocationPermission() async {
+    await _locationService.initialize();
+    if (_locationService.hasPermission) {
+      _locationService.startTracking();
+    }
+    notifyListeners();
+  }
 
   /// Initialize all services
   Future<void> initialize() async {
@@ -365,6 +382,7 @@ class ChatService extends ChangeNotifier {
 
   @override
   void dispose() {
+    _locationService.removeListener(_onLocationChanged);
     _bleMeshService.dispose();
     _nostrService.dispose();
     _locationService.dispose();

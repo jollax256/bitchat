@@ -56,6 +56,8 @@ class _HomeScreenState extends State<HomeScreen> {
             locationChannels: chatService.getLocationChannels(),
             onChannelSelected: chatService.switchChannel,
             onSettingsPressed: () => _openSettings(context),
+            hasLocationPermission: chatService.hasLocationPermission,
+            onRequestLocationPermission: chatService.requestLocationPermission,
           ),
           body: Column(
             children: [
