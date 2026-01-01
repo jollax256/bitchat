@@ -10,6 +10,7 @@ import SwiftUI
 struct SettingsView: View {
     @Environment(\.colorScheme) private var colorScheme
     @State private var showAboutAlert = false
+    @State private var showSubmissions = false
     
     var body: some View {
         List {
@@ -21,13 +22,25 @@ struct SettingsView: View {
                     title: "My Submissions",
                     subtitle: "View submitted DR forms and sync status"
                 ) {
-                    // Navigate to submissions
+                    showSubmissions = true
                 }
             } header: {
                 Text("DR FORMS")
                     .font(.caption)
                     .fontWeight(.semibold)
                     .foregroundColor(.secondary)
+            }
+            .sheet(isPresented: $showSubmissions) {
+                NavigationView {
+                    DRSubmissionView()
+                        .toolbar {
+                            ToolbarItem(placement: .cancellationAction) {
+                                Button("Close") {
+                                    showSubmissions = false
+                                }
+                            }
+                        }
+                }
             }
             
             // Account Section
