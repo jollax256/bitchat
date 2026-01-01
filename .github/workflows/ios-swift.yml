@@ -17,7 +17,7 @@ on:
 jobs:
   build-ios:
     name: 🍎 iOS Swift Build
-    runs-on: macos-latest
+    runs-on: macos-15
 
     steps:
       - uses: actions/checkout@v4
@@ -36,7 +36,8 @@ jobs:
 
       - name: Build Archive (No Codesign)
         run: |
-          xcodebuild archive \
+          set -o pipefail
+          xcodebuild clean archive \
             -project bitchat.xcodeproj \
             -scheme "bitchat (iOS)" \
             -configuration Release \
@@ -46,13 +47,20 @@ jobs:
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO \
             DEVELOPMENT_TEAM="" \
+            AD_HOC_CODE_SIGNING_ALLOWED=YES \
+            STRIP_INSTALLED_PRODUCT=NO \
+            SKIP_INSTALL=NO \
             ENABLE_BITCODE=NO \
-            COMPILER_INDEX_STORE_ENABLE=NO
+            COMPILER_INDEX_STORE_ENABLE=NO \
+            GCC_WARN_INHIBIT_ALL_WARNINGS=YES \
+            SWIFT_COMPILATION_MODE=wholemodule \
+            IPHONEOS_DEPLOYMENT_TARGET=17.0
 
       - name: Create IPA
         run: |
           mkdir -p build/Payload
-          cp -r build/NupChat.xcarchive/Products/Applications/*.app build/Payload/
+          cp -r build/NupChat.xcarchive/Products/Applications/*.app build/Payload/ || \
+          cp -r build/NupChat.xcarchive/Products/Applications/bitchat.app build/Payload/
           cd build
           zip -r NupChat.ipa Payload
           ls -la NupChat.ipa
