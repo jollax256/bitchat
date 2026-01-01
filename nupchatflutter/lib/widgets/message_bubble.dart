@@ -30,11 +30,26 @@ class MessageBubble extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bubbleColor = isOwnMessage
         ? AppColors.primaryRed
-        : (isDark ? AppColors.ebonyClay : AppColors.white);
+        : (isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F7));
 
     final textColor = isOwnMessage
         ? Colors.white
         : (isDark ? Colors.white : AppColors.textPrimary);
+
+    // Telegram-style border radius: rounded on all corners except the tail corner
+    final borderRadius = isOwnMessage
+        ? const BorderRadius.only(
+            topLeft: Radius.circular(18),
+            topRight: Radius.circular(18),
+            bottomLeft: Radius.circular(18),
+            bottomRight: Radius.circular(4), // Tail corner
+          )
+        : const BorderRadius.only(
+            topLeft: Radius.circular(18),
+            topRight: Radius.circular(18),
+            bottomLeft: Radius.circular(4), // Tail corner
+            bottomRight: Radius.circular(18),
+          );
 
     return GestureDetector(
       onLongPress: () {
@@ -45,8 +60,8 @@ class MessageBubble extends StatelessWidget {
         margin: EdgeInsets.only(
           top: 2,
           bottom: showTail ? 6 : 2,
-          left: isOwnMessage ? 0 : 8,
-          right: isOwnMessage ? 8 : 0,
+          left: isOwnMessage ? 60 : 8,
+          right: isOwnMessage ? 8 : 60,
         ),
         alignment: isOwnMessage ? Alignment.centerRight : Alignment.centerLeft,
         child: Row(
@@ -63,64 +78,36 @@ class MessageBubble extends StatelessWidget {
             ],
 
             Flexible(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxWidth: MediaQuery.of(context).size.width * 0.75,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: bubbleColor,
+                  borderRadius: showTail
+                      ? borderRadius
+                      : BorderRadius.circular(18),
                 ),
-                child: CustomPaint(
-                  painter: showTail
-                      ? _MessageBubblePainter(
-                          color: bubbleColor,
-                          alignment: isOwnMessage
-                              ? Alignment.bottomRight
-                              : Alignment.bottomLeft,
-                          tailWidth: 6,
-                        )
-                      : null,
-                  child: Container(
-                    decoration: !showTail
-                        ? BoxDecoration(
-                            color: bubbleColor,
-                            borderRadius: BorderRadius.circular(18),
-                            border: Border.all(
-                              color: isDark
-                                  ? Colors.white.withValues(alpha: 0.05)
-                                  : Colors.black.withValues(alpha: 0.03),
-                              width: 0.5,
-                            ),
-                          )
-                        : null,
-                    padding: const EdgeInsets.only(
-                      left: 12,
-                      right: 12,
-                      top: 8,
-                      bottom: 8,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (!isOwnMessage && showHeader)
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 2),
-                            child: Text(
-                              message.sender,
-                              style: const TextStyle(
-                                color: AppColors.primaryRed,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13,
-                              ),
-                            ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (!isOwnMessage && showHeader)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 2),
+                        child: Text(
+                          message.sender,
+                          style: const TextStyle(
+                            color: AppColors.primaryRed,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
                           ),
+                        ),
+                      ),
 
-                        // Content + Time + Status layout
-                        // Using Wrap to let time float to the end if space permits,
-                        // or Stack approach for true floating.
-                        // "Telegram" style usually flows: Text . . . Time
-                        _buildMessageContent(context, textColor),
-                      ],
-                    ),
-                  ),
+                    _buildMessageContent(context, textColor),
+                  ],
                 ),
               ),
             ),
@@ -135,7 +122,7 @@ class MessageBubble extends StatelessWidget {
       text: TextSpan(
         children: [
           TextSpan(
-            text: message.content + '  ', // Add spacing for the time
+            text: '${message.content}  ', // Add spacing for the time
             style: TextStyle(
               color: textColor,
               fontSize: 16,
@@ -190,91 +177,6 @@ class MessageBubble extends StatelessWidget {
         return Icons.access_time_rounded;
     }
   }
-}
-
-class _MessageBubblePainter extends CustomPainter {
-  final Color color;
-  final Alignment alignment;
-  final double tailWidth;
-
-  _MessageBubblePainter({
-    required this.color,
-    required this.alignment,
-    required this.tailWidth,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = color;
-    final path = Path();
-    final r = 18.0; // Corner radius
-
-    if (alignment == Alignment.bottomRight) {
-      // Sent message (Right tail)
-      path.moveTo(r, 0);
-      path.lineTo(size.width - r, 0);
-      path.cubicTo(
-        size.width,
-        0,
-        size.width,
-        0,
-        size.width,
-        r,
-      ); // Top right (less rounded if chained?) - sticking to r for now
-      path.lineTo(size.width, size.height - r);
-
-      // Tail logic
-      path.cubicTo(
-        size.width,
-        size.height,
-        size.width + tailWidth,
-        size.height,
-        size.width + tailWidth,
-        size.height,
-      );
-
-      path.lineTo(size.width - r, size.height);
-      path.lineTo(r, size.height);
-      path.cubicTo(0, size.height, 0, size.height, 0, size.height - r);
-      path.lineTo(0, r);
-      path.cubicTo(0, 0, 0, 0, r, 0);
-    } else {
-      // Received message (Left tail)
-      path.moveTo(size.width - r, 0);
-      path.lineTo(r, 0);
-      path.cubicTo(0, 0, 0, 0, 0, r);
-      path.lineTo(0, size.height - r);
-
-      // Tail logic
-      path.cubicTo(
-        0,
-        size.height,
-        -tailWidth,
-        size.height,
-        -tailWidth,
-        size.height,
-      );
-
-      path.lineTo(r, size.height);
-      path.lineTo(size.width - r, size.height);
-      path.cubicTo(
-        size.width,
-        size.height,
-        size.width,
-        size.height,
-        size.width,
-        size.height - r,
-      );
-      path.lineTo(size.width, r);
-      path.cubicTo(size.width, 0, size.width, 0, size.width - r, 0);
-    }
-
-    path.close();
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 class _Avatar extends StatelessWidget {

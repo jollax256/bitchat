@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'core/theme/app_theme.dart';
 import 'services/chat_service.dart';
-import 'screens/home_screen.dart';
+import 'screens/main_navigation_shell.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,6 +16,7 @@ void main() {
 /// - Nostr protocol for global reach
 /// - Location-based channels using geohash
 /// - IRC-style commands
+/// - DRM form submission with offline support
 class NupChatApp extends StatelessWidget {
   const NupChatApp({super.key});
 
@@ -29,7 +30,7 @@ class NupChatApp extends StatelessWidget {
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,
         themeMode: ThemeMode.system,
-        home: const HomeScreen(),
+        home: const MainNavigationShell(),
       ),
     );
   }

@@ -1,0 +1,22 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "nupchatsvr",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-12-31",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "r2_buckets": [
+    {
+      "binding": "DRM_IMAGES",
+      "bucket_name": "drm-images"
+    }
+  ],
+  "d1_databases": [
+    {
+      "binding": "DRM_DB",
+      "database_name": "drm-database",
+      "database_id": "YOUR_DATABASE_ID_HERE"
+    }
+  ]
+}

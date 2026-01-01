@@ -41,6 +41,12 @@ dependencies:
   collection: ^1.18.0
   flutter_native_splash: ^2.4.7
 
+  # DRM Feature
+  image_picker: ^1.1.2
+  connectivity_plus: ^6.0.5
+  path_provider: ^2.1.4
+  http: ^0.13.6
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -59,6 +65,7 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
+    - assets/jsondata/
 
 flutter_native_splash:
   color: "#e41d30"

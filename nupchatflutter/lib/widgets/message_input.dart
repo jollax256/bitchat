@@ -104,58 +104,45 @@ class _MessageInputState extends State<MessageInput>
 
             // Input Field
             Expanded(
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
+              child: Container(
                 decoration: BoxDecoration(
                   color: isDark
                       ? const Color(0xFF1C1C1E)
-                      : const Color(0xFFF2F2F7), // System fill
+                      : const Color(0xFFF2F2F7),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _controller,
-                        focusNode: _focusNode,
-                        textCapitalization: TextCapitalization.sentences,
-                        maxLines: 5,
-                        minLines: 1,
-                        style: Theme.of(
-                          context,
-                        ).textTheme.bodyLarge?.copyWith(fontSize: 16),
-                        decoration: InputDecoration(
-                          hintText: 'Message',
-                          hintStyle: TextStyle(
-                            color: isDark
-                                ? Colors.white.withValues(alpha: 0.3)
-                                : Colors.black.withValues(alpha: 0.3),
-                          ),
-                          border: InputBorder.none,
-                          enabledBorder: InputBorder.none,
-                          focusedBorder: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 10,
-                          ),
-                          isDense: true,
-                        ),
-                      ),
+                child: TextField(
+                  controller: _controller,
+                  focusNode: _focusNode,
+                  textCapitalization: TextCapitalization.sentences,
+                  maxLines: 5,
+                  minLines: 1,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge?.copyWith(fontSize: 16),
+                  decoration: InputDecoration(
+                    hintText: 'Message',
+                    hintStyle: TextStyle(
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.3)
+                          : Colors.black.withValues(alpha: 0.3),
                     ),
-                    IconButton(
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
+                    isDense: true,
+                    suffixIcon: IconButton(
                       icon: const Icon(Icons.emoji_emotions_outlined),
                       onPressed: () {},
                       color: isDark
                           ? Colors.white.withValues(alpha: 0.5)
                           : AppColors.textSecondary.withValues(alpha: 0.5),
-                      splashRadius: 20,
-                      constraints: const BoxConstraints(
-                        minWidth: 40,
-                        minHeight: 40,
-                      ),
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),
