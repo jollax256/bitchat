@@ -16,28 +16,30 @@ enum NupChatTheme {
     
     // MARK: - Primary Colors
     
-    /// Primary accent color - vibrant purple for interactive elements
+    /// Primary accent color - NUP Red
     static var accent: Color {
-        Color(red: 0.545, green: 0.361, blue: 0.965) // #8B5CF6
+        Color(red: 0.894, green: 0.114, blue: 0.188) // #E41D30
     }
     
-    /// Secondary accent - teal/cyan for alternative actions
+    /// Secondary accent - Navy Blue
     static var secondaryAccent: Color {
-        Color(red: 0.024, green: 0.714, blue: 0.831) // #06B6D4
+        Color(red: 0.008, green: 0.012, blue: 0.506) // #020381
     }
     
     // MARK: - Background Colors
     
     /// Primary background color (adaptive to color scheme)
     static func primaryBackground(_ colorScheme: ColorScheme) -> Color {
-        colorScheme == .dark ? Color.black : Color.white
+        colorScheme == .dark 
+            ? Color(red: 0.145, green: 0.149, blue: 0.220) // #252638 Ebony Clay
+            : Color.white
     }
     
     /// Secondary background for cards, input fields, etc.
     static func secondaryBackground(_ colorScheme: ColorScheme) -> Color {
         colorScheme == .dark 
-            ? Color(white: 0.11) 
-            : Color(UIColor.systemGray6)
+            ? Color(red: 0.11, green: 0.11, blue: 0.12) // #1C1C1E
+            : Color(red: 0.95, green: 0.95, blue: 0.97) // #F2F2F7
     }
     
     /// Tertiary background for nested elements
@@ -70,12 +72,12 @@ enum NupChatTheme {
     
     // MARK: - Message Bubble Colors
     
-    /// Outgoing message bubble gradient - purple to indigo
+    /// Outgoing message bubble gradient - NUP Red
     static var outgoingBubbleGradient: LinearGradient {
         LinearGradient(
             colors: [
-                Color(red: 0.545, green: 0.361, blue: 0.965), // #8B5CF6 purple
-                Color(red: 0.392, green: 0.325, blue: 0.914)  // #6453E9 indigo
+                Color(red: 0.894, green: 0.114, blue: 0.188), // #E41D30
+                Color(red: 0.75, green: 0.1, blue: 0.15)      // Darker red
             ],
             startPoint: .topLeading,
             endPoint: .bottomTrailing
@@ -84,14 +86,14 @@ enum NupChatTheme {
     
     /// Outgoing message bubble solid color (for simpler use)
     static var outgoingBubble: Color {
-        Color(red: 0.545, green: 0.361, blue: 0.965) // #8B5CF6
+        Color(red: 0.894, green: 0.114, blue: 0.188) // #E41D30
     }
     
     /// Incoming message bubble background
     static func incomingBubble(_ colorScheme: ColorScheme) -> Color {
         colorScheme == .dark 
-            ? Color(white: 0.18) 
-            : Color(UIColor.systemGray5)
+            ? Color(red: 0.17, green: 0.17, blue: 0.18) // #2C2C2E
+            : Color(red: 0.95, green: 0.95, blue: 0.97) // #F2F2F7
     }
     
     /// System message background
@@ -137,7 +139,7 @@ enum NupChatTheme {
     
     /// Geohash/location channel color
     static var geoChannel: Color {
-        Color(red: 0.024, green: 0.714, blue: 0.831) // Teal
+        Color(red: 0.894, green: 0.114, blue: 0.188) // Red
     }
     
     /// Private chat accent
@@ -182,8 +184,8 @@ extension NupChatTheme {
     static var accentGradient: LinearGradient {
         LinearGradient(
             colors: [
-                Color(red: 0.545, green: 0.361, blue: 0.965), // #8B5CF6
-                Color(red: 0.486, green: 0.302, blue: 0.929)  // #7C4DED darker
+                Color(red: 0.894, green: 0.114, blue: 0.188), // #E41D30
+                Color(red: 0.75, green: 0.1, blue: 0.15)      // Darker red
             ],
             startPoint: .top,
             endPoint: .bottom
@@ -228,13 +230,13 @@ extension NupChatTheme {
     static let cardCornerRadius: CGFloat = 18
     
     /// Medium corner radius for buttons
-    static let buttonCornerRadius: CGFloat = 14
+    static let buttonCornerRadius: CGFloat = 12
     
     /// Small corner radius for chips/tags
-    static let chipCornerRadius: CGFloat = 10
+    static let chipCornerRadius: CGFloat = 8
     
     /// Input field corner radius
-    static let inputCornerRadius: CGFloat = 22
+    static let inputCornerRadius: CGFloat = 24
 }
 
 // MARK: - Spacing

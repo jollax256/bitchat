@@ -1564,6 +1564,7 @@ extension BLEService: CBCentralManagerDelegate {
             options: [CBCentralManagerScanOptionAllowDuplicatesKey: allowDuplicates]
         )
         
+        delegate?.didUpdateScanningState(true)
         // Started BLE scanning
     }
     

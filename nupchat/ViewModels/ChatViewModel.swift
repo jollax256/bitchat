@@ -137,6 +137,7 @@ final class ChatViewModel: ObservableObject, BitchatDelegate, CommandContextProv
     @Published var currentColorScheme: ColorScheme = .light
     private let maxMessages = TransportConfig.meshTimelineCap // Maximum messages before oldest are removed
     @Published var isConnected = false
+    @Published var isScanning = false
     private var recentlySeenPeers: Set<PeerID> = []
     private var lastNetworkNotificationTime = Date.distantPast
     private var networkResetTimer: Timer? = nil
@@ -3212,6 +3213,12 @@ final class ChatViewModel: ObservableObject, BitchatDelegate, CommandContextProv
     // Mention parsing moved from BLE – use the existing non-optional helper below
     // MARK: - Bluetooth State Monitoring
 
+    func didUpdateScanningState(_ isScanning: Bool) {
+        Task { @MainActor in
+            self.isScanning = isScanning
+        }
+    }
+    
     func didUpdateBluetoothState(_ state: CBManagerState) {
         Task { @MainActor in
             updateBluetoothState(state)

@@ -63,7 +63,7 @@ struct DRFormView: View {
         .sheet(isPresented: $showImagePicker) {
             ImagePicker(image: $selectedImage, sourceType: imagePickerSource)
         }
-        .alert("DR Form", isPresented: $showAlert) {
+        .alert("DR Forms", isPresented: $showAlert) {
             Button("OK", role: .cancel) { }
         } message: {
             Text(alertMessage)
@@ -194,7 +194,7 @@ struct DRFormView: View {
     
     private var imageSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("DR Form Image")
+            Text("DR Forms Image")
                 .font(.headline)
             
             if let image = selectedImage {
@@ -266,7 +266,7 @@ struct DRFormView: View {
                 ProgressView()
                     .tint(.white)
             } else {
-                Text("Submit DR Form")
+                Text("Submit DR Forms")
                     .fontWeight(.semibold)
             }
         }

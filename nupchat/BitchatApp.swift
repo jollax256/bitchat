@@ -46,8 +46,7 @@ struct NupChatApp: App {
     
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .environmentObject(chatViewModel)
+            MainNavigationShell(viewModel: chatViewModel)
                 .onAppear {
                     NotificationDelegate.shared.chatViewModel = chatViewModel
                     // Inject live Noise service into VerificationService to avoid creating new BLE instances

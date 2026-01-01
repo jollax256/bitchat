@@ -24,8 +24,8 @@ protocol KeychainManagerProtocol {
 
 final class KeychainManager: KeychainManagerProtocol {
     // Use consistent service name for all keychain items
-    private let service = BitchatApp.bundleID
-    private let appGroup = "group.\(BitchatApp.bundleID)"
+    private let service = NupChatApp.bundleID
+    private let appGroup = "group.\(NupChatApp.bundleID)"
     
     // MARK: - Identity Keys
     

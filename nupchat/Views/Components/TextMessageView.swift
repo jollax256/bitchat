@@ -23,15 +23,12 @@ struct TextMessageView: View {
     }
     
     private var bubbleBackground: some View {
-        Group {
-            if isOutgoing {
-                RoundedRectangle(cornerRadius: NupChatTheme.bubbleCornerRadius, style: .continuous)
-                    .fill(NupChatTheme.outgoingBubbleGradient)
-            } else {
-                RoundedRectangle(cornerRadius: NupChatTheme.bubbleCornerRadius, style: .continuous)
-                    .fill(NupChatTheme.incomingBubble(colorScheme))
-            }
-        }
+        let corners: UIRectCorner = isOutgoing 
+            ? [.topLeft, .topRight, .bottomLeft] 
+            : [.topLeft, .topRight, .bottomRight]
+        
+        return ChatBubbleShape(corners: corners, radius: 18)
+            .fill(isOutgoing ? AnyShapeStyle(NupChatTheme.outgoingBubbleGradient) : AnyShapeStyle(NupChatTheme.incomingBubble(colorScheme)))
     }
     
     private var textColor: Color {
@@ -53,7 +50,15 @@ struct TextMessageView: View {
             
             VStack(alignment: isOutgoing ? .trailing : .leading, spacing: 4) {
                 // Message bubble
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 2) {
+                    // Sender name for group chats
+                    if !isOutgoing && !message.isPrivate {
+                        Text(message.sender)
+                            .font(.bitchatSystem(size: 12, weight: .bold))
+                            .foregroundColor(NupChatTheme.accent)
+                            .padding(.bottom, 1)
+                    }
+                    
                     // Message content
                     Text(viewModel.formatMessageAsText(message, colorScheme: colorScheme))
                         .font(.bitchatSystem(size: 15))
@@ -108,6 +113,20 @@ struct TextMessageView: View {
             
             if !isOutgoing { Spacer(minLength: 60) }
         }
+    }
+}
+
+struct ChatBubbleShape: Shape {
+    var corners: UIRectCorner
+    var radius: CGFloat
+
+    func path(in rect: CGRect) -> Path {
+        let path = UIBezierPath(
+            roundedRect: rect,
+            byRoundingCorners: corners,
+            cornerRadii: CGSize(width: radius, height: radius)
+        )
+        return Path(path.cgPath)
     }
 }
 

@@ -1,24 +1,41 @@
 name: NupChat iOS Swift Build
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - "nupchat/**"
+      - "bitchat.xcodeproj/**"
+      - ".github/workflows/ios-swift.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "nupchat/**"
+      - "bitchat.xcodeproj/**"
   workflow_dispatch:
 
 jobs:
   build-ios:
     name: 🍎 iOS Swift Build
-    runs-on: macos-latest
+    runs-on: macos-15
 
     steps:
       - uses: actions/checkout@v4
 
       - name: Select Xcode Version
-        run: sudo xcode-select -s /Applications/Xcode.app
+        run: sudo xcode-select -s /Applications/Xcode_16.2.app || sudo xcode-select -s /Applications/Xcode.app
 
       - name: Show Xcode Version
         run: xcodebuild -version
 
       - name: List Schemes
         run: xcodebuild -list -project bitchat.xcodeproj
+
+      - name: Resolve Swift Package Dependencies
+        run: |
+          xcodebuild -resolvePackageDependencies \
+            -project bitchat.xcodeproj \
+            -scheme "bitchat (iOS)"
 
       - name: Build Archive (No Codesign)
         run: |
@@ -31,7 +48,9 @@ jobs:
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO \
-            DEVELOPMENT_TEAM="" | xcpretty
+            DEVELOPMENT_TEAM="" \
+            ENABLE_BITCODE=NO \
+            COMPILER_INDEX_STORE_ENABLE=NO
 
       - name: Create IPA
         run: |
@@ -39,18 +58,26 @@ jobs:
           cp -r build/NupChat.xcarchive/Products/Applications/*.app build/Payload/
           cd build
           zip -r NupChat.ipa Payload
+          ls -la NupChat.ipa
 
       - name: Upload IPA Artifact
         uses: actions/upload-artifact@v4
         with:
           name: NupChat-iOS
           path: build/NupChat.ipa
+          if-no-files-found: error
 
       - name: Upload IPA to Release
+        if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: build/NupChat.ipa
-          tag: nupswift-v1.0
+          asset_name: NupChat-iOS-${{ github.sha }}.ipa
+          tag: nupswift-latest
           overwrite: true
-          body: "NupChat iOS build from Swift codebase"
+          body: |
+            NupChat iOS build from Swift codebase
+
+            Commit: ${{ github.sha }}
+            Built: ${{ github.event.head_commit.timestamp }}

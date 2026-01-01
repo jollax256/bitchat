@@ -178,11 +178,14 @@ protocol BitchatDelegate: AnyObject {
 
     // Bluetooth state updates for user notifications
     func didUpdateBluetoothState(_ state: CBManagerState)
+    func didUpdateScanningState(_ isScanning: Bool)
     func didReceivePublicMessage(from peerID: PeerID, nickname: String, content: String, timestamp: Date, messageID: String?)
 }
 
 // Provide default implementation to make it effectively optional
 extension BitchatDelegate {
+    func didUpdateScanningState(_ isScanning: Bool) {}
+    
     func isFavorite(fingerprint: String) -> Bool {
         return false
     }
