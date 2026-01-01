@@ -17,13 +17,10 @@ on:
 jobs:
   build-ios:
     name: 🍎 iOS Swift Build
-    runs-on: macos-15
+    runs-on: macos-latest
 
     steps:
       - uses: actions/checkout@v4
-
-      - name: Select Xcode Version
-        run: sudo xcode-select -s /Applications/Xcode_16.2.app || sudo xcode-select -s /Applications/Xcode.app
 
       - name: Show Xcode Version
         run: xcodebuild -version

@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 90;
+	objectVersion = 60;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -347,7 +347,7 @@
 				A6E3E56E2E77036A0032EA8A /* XCLocalSwiftPackageReference "localPackages/BitLogger" */,
 				A6E3EA7D2E7706720032EA8A /* XCLocalSwiftPackageReference "localPackages/Tor" */,
 			);
-			preferredProjectObjectVersion = 90;
+			preferredProjectObjectVersion = 60;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
