@@ -1,0 +1,53 @@
+name: Flutter iOS-ipa-build
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-ios:
+    name: 🎉 iOS Build
+    runs-on: macos-latest
+
+    # 👇 ALL run commands will execute inside this folder
+    defaults:
+      run:
+        working-directory: nupchat/nupchatflutter
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          architecture: x64
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Update CocoaPods
+        run: pod repo update
+        working-directory: nupchat/nupchatflutter/ios
+
+      - name: Build iOS (no codesign)
+        run: flutter build ios --release --no-codesign
+
+      - name: Create Payload folder
+        run: mkdir Payload
+        working-directory: nupchat/nupchatflutter/build/ios/iphoneos
+
+      - name: Move app to Payload
+        run: mv Runner.app Payload
+        working-directory: nupchat/nupchatflutter/build/ios/iphoneos
+
+      - name: Zip IPA
+        run: zip -qq -r -9 FlutterIpaExport.ipa Payload
+        working-directory: nupchat/nupchatflutter/build/ios/iphoneos
+
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: nupchat/nupchatflutter/build/ios/iphoneos/FlutterIpaExport.ipa
+          tag: v1.0
+          overwrite: true
+          body: "This is first release"
