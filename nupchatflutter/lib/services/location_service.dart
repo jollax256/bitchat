@@ -89,11 +89,12 @@ class LocationService extends ChangeNotifier {
     final lat = _currentPosition!.latitude;
     final lon = _currentPosition!.longitude;
 
-    // Calculate geohash at maximum precision (7 chars for block level)
-    final geoHash = GeoHash.encode(lat, lon, precision: 7);
+    // Calculate geohash at maximum precision (8 chars for building level)
+    final geoHash = GeoHash.encode(lat, lon, precision: 8);
     _currentGeohash = geoHash.hash;
 
-    // Store geohashes at each level
+    // Store geohashes at each level (matches iOS GeohashChannelLevel)
+    _geohashLevels[GeohashLevel.building] = geoHash.hash.substring(0, 8);
     _geohashLevels[GeohashLevel.block] = geoHash.hash.substring(0, 7);
     _geohashLevels[GeohashLevel.neighborhood] = geoHash.hash.substring(0, 6);
     _geohashLevels[GeohashLevel.city] = geoHash.hash.substring(0, 5);

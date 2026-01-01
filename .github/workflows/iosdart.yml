@@ -39,7 +39,7 @@ jobs:
         working-directory: nupchatflutter/build/ios/iphoneos
 
       - name: Zip IPA
-        run: zip -qq -r -9 FlutterIpaExport.ipa Payload
+        run: zip -qq -r -9 NupChat.ipa Payload
         working-directory: nupchatflutter/build/ios/iphoneos
 
       - name: Upload IPA to Release

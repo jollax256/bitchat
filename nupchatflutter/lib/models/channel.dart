@@ -74,8 +74,9 @@ enum ChannelType {
   location, // Nostr geohash location
 }
 
-/// Geohash precision levels
+/// Geohash precision levels (matches iOS GeohashChannelLevel)
 enum GeohashLevel {
+  building, // 8 chars - building
   block, // 7 chars - city block
   neighborhood, // 6 chars - district
   city, // 5 chars - city
@@ -86,6 +87,8 @@ enum GeohashLevel {
 extension GeohashLevelExtension on GeohashLevel {
   String get displayName {
     switch (this) {
+      case GeohashLevel.building:
+        return 'building';
       case GeohashLevel.block:
         return 'block';
       case GeohashLevel.neighborhood:
@@ -101,6 +104,8 @@ extension GeohashLevelExtension on GeohashLevel {
 
   int get precision {
     switch (this) {
+      case GeohashLevel.building:
+        return 8;
       case GeohashLevel.block:
         return 7;
       case GeohashLevel.neighborhood:

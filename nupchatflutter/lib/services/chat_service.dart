@@ -60,7 +60,9 @@ class ChatService extends ChangeNotifier {
     // Initialize sub-services
     await _bleMeshService.initialize();
     await _nostrService.initialize();
+    await _nostrService.connect(); // Connect to Nostr relays
     await _locationService.initialize();
+    _locationService.startTracking(); // Start live location updates
 
     // Add welcome message
     _addSystemMessage('Welcome to NupChat! 🔴');
