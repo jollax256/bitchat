@@ -70,9 +70,8 @@ app.post('/api/drm/upload-image', async (c) => {
       },
     });
 
-    // Construct public URL (assumes R2 bucket has public access or custom domain)
-    // Update this URL pattern to match your R2 bucket configuration
-    const publicUrl = `https://drm-images.YOUR_DOMAIN.com/${filename}`;
+    // Construct public URL - using the worker itself to serve images
+    const publicUrl = `${new URL(c.req.url).origin}/api/drm/images/${filename.split('/').pop()}`;
 
     return c.json({
       success: true,
@@ -82,6 +81,28 @@ app.post('/api/drm/upload-image', async (c) => {
   } catch (error) {
     console.error('Image upload error:', error);
     return c.json({ error: 'Failed to upload image' }, 500);
+  }
+});
+
+/**
+ * Serve an image from R2 bucket
+ */
+app.get('/api/drm/images/:filename', async (c) => {
+  try {
+    const filename = c.req.param('filename');
+    const object = await c.env.DRM_IMAGES.get(`drm/${filename}`);
+
+    if (!object) {
+      return c.notFound();
+    }
+
+    const headers = new Headers();
+    object.writeHttpMetadata(headers);
+    headers.set('etag', object.httpEtag);
+
+    return c.body(object.body, 200, Object.fromEntries(headers));
+  } catch (error) {
+    return c.json({ error: 'Failed to fetch image' }, 500);
   }
 });
 

@@ -772,6 +772,11 @@ final class ChatViewModel: ObservableObject, BitchatDelegate, CommandContextProv
         meshService.sendBroadcastAnnounce()
     }
     
+    func setNickname(_ name: String) {
+        nickname = name
+        validateAndSaveNickname()
+    }
+    
     func validateAndSaveNickname() {
         // Trim whitespace from nickname
         let trimmed = nickname.trimmingCharacters(in: .whitespacesAndNewlines)

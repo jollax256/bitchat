@@ -50,21 +50,22 @@ struct TextMessageView: View {
             
             VStack(alignment: isOutgoing ? .trailing : .leading, spacing: 4) {
                 // Message bubble
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: 6) {
                     // Sender name for group chats
                     if !isOutgoing && !message.isPrivate {
                         Text(message.sender)
                             .font(.bitchatSystem(size: 12, weight: .bold))
                             .foregroundColor(NupChatTheme.accent)
-                            .padding(.bottom, 1)
+                            .padding(.bottom, 2)
                     }
                     
                     // Message content
                     Text(viewModel.formatMessageAsText(message, colorScheme: colorScheme))
-                        .font(.bitchatSystem(size: 15))
+                        .font(.bitchatSystem(size: 16))
                         .foregroundColor(textColor)
                         .fixedSize(horizontal: false, vertical: true)
                         .lineLimit(isLong && !isExpanded ? TransportConfig.uiLongMessageLineLimit : nil)
+                        .lineSpacing(2)
                     
                     // Expand/Collapse for very long messages
                     if isLong {
@@ -73,16 +74,17 @@ struct TextMessageView: View {
                             else { expandedMessageIDs.insert(message.id) }
                         }) {
                             Text(isExpanded ? "Show less" : "Show more")
-                                .font(.bitchatSystem(size: 12, weight: .medium))
-                                .foregroundColor(isOutgoing ? .white.opacity(0.8) : NupChatTheme.accent)
+                                .font(.bitchatSystem(size: 13, weight: .medium))
+                                .foregroundColor(isOutgoing ? .white.opacity(0.9) : NupChatTheme.accent)
                         }
                         .buttonStyle(.plain)
+                        .padding(.top, 2)
                     }
                     
                     // Bottom row: timestamp + delivery status
-                    HStack(spacing: 4) {
+                    HStack(spacing: 6) {
                         Text(message.timestamp, style: .time)
-                            .font(.bitchatMono(size: 10))
+                            .font(.bitchatMono(size: 11))
                             .foregroundColor(secondaryTextColor)
                         
                         // Delivery status indicator for private messages
@@ -91,9 +93,10 @@ struct TextMessageView: View {
                             DeliveryStatusView(status: status, isOutgoing: isOutgoing)
                         }
                     }
+                    .padding(.top, 2)
                 }
-                .padding(.horizontal, NupChatTheme.bubbleHorizontalPadding)
-                .padding(.vertical, NupChatTheme.bubbleVerticalPadding)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 10)
                 .background(bubbleBackground)
                 .subtleShadow(colorScheme: colorScheme)
                 

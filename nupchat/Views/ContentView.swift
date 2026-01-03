@@ -81,6 +81,12 @@ struct ContentView: View {
     @State private var windowCountPublic: Int = 300
     @State private var windowCountPrivate: [PeerID: Int] = [:]
     
+    // Keyboard handling
+    @State private var keyboardHeight: CGFloat = 0
+    @State private var sheetKeyboardHeight: CGFloat = 0
+    @State private var showNicknameAlert = false
+    @State private var newNickname = ""
+    
     // MARK: - Computed Properties
     
     private var backgroundColor: Color {
@@ -132,42 +138,46 @@ struct ContentView: View {
 // MARK: - Body
 
     var body: some View {
-        VStack(spacing: 0) {
-            mainHeaderView
+            VStack(spacing: 0) {
+                mainHeaderView
+                    .background(backgroundColor)
+                
+                
+                messagesView(privatePeer: nil, isAtBottom: $isAtBottomPublic)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        // Dismiss keyboard when tapping on messages area
+                        #if os(iOS)
+                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                        #endif
+                    }
+
+                if viewModel.selectedPrivateChatPeer == nil {
+                    Divider()
+                    inputView
+                        .background(NupChatTheme.primaryBackground(colorScheme))
+                }
+            }
+
                 .onAppear {
                     viewModel.currentColorScheme = colorScheme
                     #if os(macOS)
-                    // Focus message input on macOS launch, not nickname field
                     DispatchQueue.main.async {
                         isNicknameFieldFocused = false
                         isTextFieldFocused = true
                     }
                     #endif
+                    
+
+
                 }
                 .onChange(of: colorScheme) { newValue in
                     viewModel.currentColorScheme = newValue
                 }
-
-            Divider()
-
-            GeometryReader { geometry in
-                VStack(spacing: 0) {
-                    messagesView(privatePeer: nil, isAtBottom: $isAtBottomPublic)
-                        .background(backgroundColor)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                }
-                .frame(width: geometry.size.width, height: geometry.size.height)
-            }
-
-            Divider()
-
-            if viewModel.selectedPrivateChatPeer == nil {
-                inputView
-            }
-        }
-        .background(backgroundColor)
-        .foregroundColor(textColor)
-        .overlay {
+                .background(backgroundColor)
+                .foregroundColor(textColor)
+                .overlay {
             if showDrawer {
                 ZStack {
                     Color.black.opacity(0.4)
@@ -369,6 +379,13 @@ struct ContentView: View {
             scrollThrottleTimer?.invalidate()
             autocompleteDebounceTimer?.invalidate()
         }
+        .alert("Set Nickname", isPresented: $showNicknameAlert) {
+             TextField("Nickname", text: $newNickname)
+             Button("Cancel", role: .cancel) { }
+             Button("Save") {
+                 viewModel.setNickname(newNickname)
+             }
+         }
     }
     
     // MARK: - Message List View
@@ -817,6 +834,11 @@ struct ContentView: View {
 
         // Clear input immediately for instant feedback
         messageText = ""
+        
+        // Dismiss keyboard after sending
+        #if os(iOS)
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        #endif
 
         // Defer actual send to next runloop to avoid blocking
         DispatchQueue.main.async {
@@ -1066,11 +1088,51 @@ struct ContentView: View {
             messagesView(privatePeer: viewModel.selectedPrivateChatPeer, isAtBottom: $isAtBottomPrivate)
                 .background(backgroundColor)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    // Dismiss keyboard when tapping on messages area
+                    #if os(iOS)
+                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                    #endif
+                }
             Divider()
             inputView
         }
         .background(backgroundColor)
         .foregroundColor(textColor)
+        .padding(.bottom, sheetKeyboardHeight + 2)
+        .onAppear {
+            #if os(iOS)
+            // Setup keyboard observers for sheet
+            NotificationCenter.default.addObserver(
+                forName: UIResponder.keyboardWillShowNotification,
+                object: nil,
+                queue: .main
+            ) { notification in
+                if let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
+                    let bottomSafeArea = UIApplication.shared.connectedScenes
+                        .compactMap { $0 as? UIWindowScene }
+                        .flatMap { $0.windows }
+                        .first { $0.isKeyWindow }?
+                        .safeAreaInsets.bottom ?? 0
+                    
+                    withAnimation(.easeOut(duration: 0.25)) {
+                        sheetKeyboardHeight = keyboardFrame.height - bottomSafeArea
+                    }
+                }
+            }
+            
+            NotificationCenter.default.addObserver(
+                forName: UIResponder.keyboardWillHideNotification,
+                object: nil,
+                queue: .main
+            ) { _ in
+                withAnimation(.easeOut(duration: 0.25)) {
+                    sheetKeyboardHeight = 0
+                }
+            }
+            #endif
+        }
         .highPriorityGesture(
             DragGesture(minimumDistance: 25, coordinateSpace: .local)
                 .onEnded { value in
@@ -1276,6 +1338,17 @@ struct ContentView: View {
                         .onTapGesture {
                             showAppInfo = true
                         }
+
+                    
+                    Button(action: {
+                        newNickname = viewModel.nickname
+                        showNicknameAlert = true
+                    }) {
+                        Text(viewModel.nickname.isEmpty ? "Set Nickname" : "@\(viewModel.nickname)")
+                            .font(.bitchatSystem(size: 12, weight: .medium))
+                            .foregroundColor(NupChatTheme.accent)
+                    }
+                    .buttonStyle(.plain)
                     
                     let cc = channelPeopleCountAndColor()
                     let headerOtherPeersCount: Int = {
@@ -1313,7 +1386,7 @@ struct ContentView: View {
                 Spacer()
                 
                 // Peer List Button
-                Button(action: { showPeerList = true }) {
+                Button(action: { showSidebar = true }) {
                     Image(systemName: "person.2.fill")
                         .font(.system(size: 18))
                         .foregroundColor(secondaryTextColor)
@@ -1328,14 +1401,13 @@ struct ContentView: View {
         .padding(.top, 8)
     }
 
-}
 
 // MARK: - Helper Views
 
 // Rounded payment chip button
 //
 
-private enum MessageMedia {
+fileprivate enum MessageMedia {
     case voice(URL)
     case image(URL)
 
@@ -1347,8 +1419,10 @@ private enum MessageMedia {
     }
 }
 
+}
+
 private extension ContentView {
-    func mediaAttachment(for message: BitchatMessage) -> MessageMedia? {
+    fileprivate func mediaAttachment(for message: BitchatMessage) -> MessageMedia? {
         guard let baseDirectory = applicationFilesDirectory() else { return nil }
 
         // Extract filename from message content

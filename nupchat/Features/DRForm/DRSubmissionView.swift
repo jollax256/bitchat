@@ -22,6 +22,15 @@ struct DRSubmissionView: View {
                         .onTapGesture {
                             selectedSubmission = submission
                         }
+                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                            if submission.status != .sent {
+                                Button(role: .destructive) {
+                                    service.deleteSubmission(submission.id)
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
+                            }
+                        }
                 }
             }
         }
@@ -78,27 +87,28 @@ struct SubmissionRow: View {
                     .clipShape(RoundedRectangle(cornerRadius: 8))
             } else {
                 RoundedRectangle(cornerRadius: 8)
-                    .fill(Color.gray.opacity(0.3))
+                    .fill(Color(.secondarySystemBackground))
                     .frame(width: 56, height: 56)
                     .overlay {
                         Image(systemName: "photo")
-                            .foregroundColor(.gray)
+                            .foregroundColor(.secondary)
                     }
             }
             
             VStack(alignment: .leading, spacing: 4) {
                 Text("\(submission.district) - \(submission.pollingStation)")
                     .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(Color.primary)
                     .lineLimit(1)
                 
                 Text("\(submission.county) › \(submission.subCounty) › \(submission.parish)")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(Color.secondary)
                     .lineLimit(1)
                 
                 Text(submission.timestamp.formatted(date: .abbreviated, time: .shortened))
                     .font(.caption2)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(Color.secondary)
             }
             
             Spacer()

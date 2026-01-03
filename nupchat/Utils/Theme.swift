@@ -92,8 +92,8 @@ enum NupChatTheme {
     /// Incoming message bubble background
     static func incomingBubble(_ colorScheme: ColorScheme) -> Color {
         colorScheme == .dark 
-            ? Color(red: 0.17, green: 0.17, blue: 0.18) // #2C2C2E
-            : Color(red: 0.95, green: 0.95, blue: 0.97) // #F2F2F7
+            ? Color(red: 0.12, green: 0.17, blue: 0.20) // #1F2C34 WhatsApp Dark
+            : Color.white
     }
     
     /// System message background

@@ -55,6 +55,7 @@ struct DRFormView: View {
             }
             .padding()
         }
+        .background(Color(.systemBackground))
         .navigationTitle("DR Forms")
         .navigationBarTitleDisplayMode(.inline)
         .task {
@@ -62,6 +63,7 @@ struct DRFormView: View {
         }
         .sheet(isPresented: $showImagePicker) {
             ImagePicker(image: $selectedImage, sourceType: imagePickerSource)
+                .ignoresSafeArea()
         }
         .alert("DR Forms", isPresented: $showAlert) {
             Button("OK", role: .cancel) { }
@@ -254,7 +256,7 @@ struct DRFormView: View {
         }
         .frame(maxWidth: .infinity)
         .frame(height: 150)
-        .background(Color(.systemGray6))
+        .background(Color(.secondarySystemBackground))
         .cornerRadius(12)
     }
     
@@ -375,13 +377,14 @@ struct LocationPicker<T: Identifiable & Hashable>: View {
             } label: {
                 HStack {
                     Text(selection.map(itemLabel) ?? (isEnabled ? "Select \(title)" : "Select \(title.lowercased()) above first"))
-                        .foregroundColor(selection != nil ? .primary : .secondary)
+                        .foregroundColor(selection != nil ? Color.primary : Color.secondary)
+                        .lineLimit(1)
                     Spacer()
                     Image(systemName: "chevron.down")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(Color.secondary)
                 }
                 .padding()
-                .background(Color(.systemGray6))
+                .background(Color(.secondarySystemBackground))
                 .cornerRadius(12)
             }
             .disabled(!isEnabled)

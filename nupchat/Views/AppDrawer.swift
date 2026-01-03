@@ -78,6 +78,10 @@ struct AppDrawer: View {
                 .scaledToFit()
                 .frame(height: 38)
             
+            Text("NupChat")
+                .font(.system(size: 24, weight: .heavy))
+                .foregroundColor(.white)
+            
             Text("Secure P2P Mesh Network")
                 .font(.system(size: 13))
                 .foregroundColor(.white.opacity(0.7))
@@ -216,22 +220,22 @@ struct AppDrawer: View {
                 HStack(spacing: 12) {
                     Image(systemName: "gearshape")
                         .font(.system(size: 20))
-                        .foregroundColor(Color(red: 0.008, green: 0.012, blue: 0.506))
+                        .foregroundColor(NupChatTheme.accent)
                     
                     Text("Settings")
                         .font(.system(size: 15, weight: .semibold))
-                        .foregroundColor(Color(red: 0.008, green: 0.012, blue: 0.506))
+                        .foregroundColor(NupChatTheme.accent)
                     
                     Spacer()
                     
                     Image(systemName: "chevron.right")
                         .font(.system(size: 14))
-                        .foregroundColor(Color(red: 0.008, green: 0.012, blue: 0.506))
+                        .foregroundColor(NupChatTheme.accent)
                 }
                 .padding(16)
                 .background(
                     RoundedRectangle(cornerRadius: 12)
-                        .fill(Color(red: 0.008, green: 0.012, blue: 0.506).opacity(0.05))
+                        .fill(NupChatTheme.accent.opacity(0.05))
                 )
             }
             .buttonStyle(.plain)

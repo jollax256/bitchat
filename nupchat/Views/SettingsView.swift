@@ -9,8 +9,11 @@ import SwiftUI
 
 struct SettingsView: View {
     @Environment(\.colorScheme) private var colorScheme
+    @EnvironmentObject var viewModel: ChatViewModel
     @State private var showAboutAlert = false
     @State private var showSubmissions = false
+    @State private var showNicknameAlert = false
+    @State private var newNickname = ""
     
     var body: some View {
         List {
@@ -51,7 +54,8 @@ struct SettingsView: View {
                     title: "Profile",
                     subtitle: "Manage your nickname and identity"
                 ) {
-                    // Navigate to profile
+                    newNickname = viewModel.nickname
+                    showNicknameAlert = true
                 }
                 
                 SettingsTile(
@@ -124,6 +128,14 @@ struct SettingsView: View {
         .listStyle(.insetGrouped)
         .navigationTitle("Settings")
         .navigationBarTitleDisplayMode(.inline)
+
+        .alert("Set Nickname", isPresented: $showNicknameAlert) {
+            TextField("Nickname", text: $newNickname)
+            Button("Cancel", role: .cancel) { }
+            Button("Save") {
+                viewModel.setNickname(newNickname)
+            }
+        }
         .alert("About NupChat", isPresented: $showAboutAlert) {
             Button("Close", role: .cancel) {}
         } message: {
